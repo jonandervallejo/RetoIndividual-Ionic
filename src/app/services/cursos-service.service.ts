@@ -9,6 +9,11 @@ interface Curso{
   descripcion: string;
 }
 
+interface Usuario {
+  nombre: string;
+  nota: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -21,5 +26,13 @@ export class CursosServiceService {
   //metodo para coger los cursos de la api
   getCursos(): Observable<Curso[]> {
     return this.http.get<Curso[]>(this.url);
+  }
+
+  getUsuariosMatriculados(cursoId: number): Observable<Usuario[]> {
+    return this.http.get<any[]>(`${this.url}/curso/${cursoId}/usuarios`);
+  }
+
+  getNotaUsuario(cursoId: number, userId: string | null): Observable<number> {
+    return this.http.get<number>(`${this.url}/curso/${cursoId}/usuario/${userId}/nota`);
   }
 }

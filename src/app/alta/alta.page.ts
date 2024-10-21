@@ -12,29 +12,49 @@ export class AltaPage implements OnInit {
   usuarios: any[] = [];
   cursos: any[] = [];
   selectedUsuario: number | null = null;
-  selectedCurso: number | null = null; // Asegúrate de que sea un número
+  selectedCurso: number | null = null; 
   toastMessage: string = '';
+  esRoot: boolean = false;
 
   constructor(private http: HttpClient, private toastController: ToastController) {}
 
   ngOnInit() {
     this.cargarUsuarios();
     this.cargarCursos();
+    this.verificarRoot();
   }
 
-  cargarUsuarios() {
+  // Verificar el rol del usuario desde la base de datos
+  verificarRoot() 
+  {
+    const userRole = localStorage.getItem('userRole');
+    if (userRole === 'root') {
+      this.esRoot = true;
+      console.log('Tienes permiso para acceder a esta página como root.');
+
+    } else {
+      this.esRoot = false;
+      //this.toastMessage = 'No tienes permiso para acceder a esta página.';
+      //this.mostrarToast();
+    }
+  }
+
+  //cargar los cursos en el desplegable
+  cargarUsuarios() 
+  {
     this.http.get<any[]>('http://44.198.98.117:8001/usuario').subscribe(data => {
       this.usuarios = data;
-      console.log('Usuarios cargados:', this.usuarios); 
+      //console.log('Usuarios cargados:', this.usuarios); 
     });
   }
 
- 
-  cargarCursos() {
+  //cargar los cursos en el desplegable 
+  cargarCursos() 
+  {
     this.http.get('http://44.198.98.117:8001/curso').subscribe(
         (response: any) => {
             this.cursos = response; 
-            console.log('Cursos cargados:', this.cursos); 
+            //console.log('Cursos cargados:', this.cursos); 
         },
         error => {
             console.error('Error al cargar los cursos:', error);
@@ -42,7 +62,7 @@ export class AltaPage implements OnInit {
     );
   }
 
-
+  //hacer la relacion entre el usuario y el curso (se recogen las ids y se muestran sus nombres)
   enlazarUsuarioCurso() {
     // Asegúrate de que selectedUsuario y selectedCurso tengan valores
     if (this.selectedUsuario === null || this.selectedCurso === null) {
@@ -51,15 +71,16 @@ export class AltaPage implements OnInit {
         return;
     }
 
+    
     const body = {
-      usuarioId: this.selectedUsuario,
-      cursoId: this.selectedCurso // Debería ser el ID del curso
+      id_usuario: this.selectedUsuario,
+      id_curso: this.selectedCurso 
     };
 
-    console.log('Datos enviados:', body); // Verifica lo que se envía
+    console.log('Datos enviados:', body); 
 
     this.http.post('http://44.198.98.117:8001/usuarioCurso/anadir', body).subscribe(
-      response => {
+      () => {
         this.toastMessage = 'Usuario enlazado con éxito al curso';
         this.mostrarToast();
       },
@@ -71,6 +92,7 @@ export class AltaPage implements OnInit {
     );
   }
 
+  //pa los mensajes 
   async mostrarToast() {
     const toast = await this.toastController.create({
       message: this.toastMessage,
