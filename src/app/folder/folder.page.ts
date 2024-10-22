@@ -1,6 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CursosServiceService } from '../services/cursos-service.service';
+import { HttpClient } from '@angular/common/http';
 
 interface Curso{
   id: number;
@@ -27,8 +28,12 @@ export class FolderPage implements OnInit {
   cursos: Curso[] = []; //almaceno los cursos
   isLoggedIn: boolean = false;
   esRoot: boolean = false;
+  estudiantes: any[] = [];
+  nota: number | null = null;
+  errorMessage: string = '';
 
-  constructor(private cursosService:CursosServiceService, private router: Router) {}
+
+  constructor(private cursosService:CursosServiceService, private router: Router, private http:HttpClient) {}
 
   ngOnInit() {
     this.folder = this.activatedRoute.snapshot.paramMap.get('id') as string;
@@ -75,9 +80,38 @@ export class FolderPage implements OnInit {
     }
   }
 
-  cargarUsuariosMatriculados(cursoId: number) {
-    return this.cursosService.getUsuariosMatriculados(cursoId);
+  cargarEstudiantesPorCurso(cursoId: number) {
+    this.http.get<any[]>(`http://44.198.98.117:8001/curso/${cursoId}/usuarios`).subscribe(data => {
+      this.estudiantes = data;
+      console.log('Estudiantes cargados:', this.estudiantes);
+    }, error => {
+      this.errorMessage = 'Error al cargar los estudiantes';
+      console.error(error);
+    });
   }
+
+  verCurso(cursoId: number) {
+    const userId = localStorage.getItem('userId');
+  
+    if (this.esRoot) {
+      // Si el usuario es administrador, cargar los estudiantes del curso
+      this.cargarEstudiantesPorCurso(cursoId);
+    } else {
+      // Si no, cargar la nota del estudiante
+      if (userId) {
+        //console.log('ID del usuario recuperado:', userId);
+        this.http.get<any>(`http://44.198.98.117:8001/curso/${cursoId}/nota/${userId}`).subscribe(data => {
+          this.nota = data.nota; // Ahora la nota se obtiene del nuevo endpoint
+          //console.log('Nota cargada:', this.nota);
+        }, error => {
+          //añadir toasts
+        });
+      } else {
+        
+      }
+    }
+  }
+  
 
   cargarNotaUsuario(cursoId: number) {
     const userId = localStorage.getItem('userId');

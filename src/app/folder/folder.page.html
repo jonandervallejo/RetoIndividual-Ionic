@@ -9,12 +9,43 @@
 
 <ion-content [fullscreen]="true">
 
-  <div *ngIf="isLoggedIn; else noAccess">
+  <!--<div *ngIf="isLoggedIn; else noAccess">-->
+
     <ion-list>
+      <ion-item *ngFor="let curso of cursos" (click)="verCurso(curso.id)">
+        <ion-label>{{ curso.nombre }}</ion-label>
+      </ion-item>
+    </ion-list>
+
+    <ion-list *ngIf="esRoot && estudiantes.length > 0">
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Estudiantes Matriculados</ion-title>
+        </ion-toolbar>
+      </ion-header>
+      <ion-item *ngFor="let estudiante of estudiantes">
+        <ion-label>{{ estudiante.nombre }}</ion-label>
+      </ion-item>
+    </ion-list>
+
+    <!-- Si el usuario es estudiante, muestra su nota -->
+    <ion-list *ngIf="!esRoot && nota != null">
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Nota Media del Curso</ion-title>
+        </ion-toolbar>
+      </ion-header>
+      <ion-item>
+        <ion-label>{{ nota }}</ion-label>
+      </ion-item>
+    </ion-list>
+
+    <!--<ion-list>
       <ion-item *ngFor="let curso of cursos">
         <ion-label>
           <h2>{{ curso.nombre }}</h2>
           <p>{{ curso.descripcion }}</p>
+
           <div *ngIf="esRoot; else userNota">
             <ion-list>
               <ion-item *ngFor="let usuario of curso.usuarios">
@@ -25,6 +56,7 @@
               </ion-item>
             </ion-list>
           </div>
+
           <ng-template #userNota>
             <p>Tu nota: {{ curso.nota }}</p>
           </ng-template>
@@ -37,6 +69,6 @@
     <ion-item>
       <ion-label>No tienes permiso para acceder a esta página. Por favor, inicia sesión.</ion-label>
     </ion-item>
-  </ng-template>
+  </ng-template>-->
 
 </ion-content>
